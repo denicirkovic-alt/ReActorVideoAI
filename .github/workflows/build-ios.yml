@@ -86,9 +86,11 @@ jobs:
       - name: Package Build Artifacts
         run: |
           mkdir -p build-artifacts
-          find ~/Library/Developer/Xcode/DerivedData -name "ReActorVideoAI.app" -type d -exec cp -R {} build-artifacts/ \; 2>/dev/null || echo "No .app found"
-          cp ReActorVideoAI/*.mlmodel build-artifacts/ 2>/dev/null || echo "No mlmodel to copy"
-          ls -la build-artifacts/
+          # Zoek de app overal in de werkmap en kopieer hem
+          find . -name "*.app" -type d -exec cp -R {} build-artifacts/ \;
+          # Kopieer ook het model
+          cp ReActorVideoAI/*.mlmodel build-artifacts/ 2>/dev/null || echo "No mlmodel"
+          ls -R build-artifacts/
       
       # 11. Upload Artifacts
       - name: Upload Build Artifacts
