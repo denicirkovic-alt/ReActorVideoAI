@@ -277,6 +277,8 @@ enum ModelError: LocalizedError {
             return "Input frame heeft verkeerde grootte"
         case .predictionFailed(let error):
             return "Model prediction mislukt: \(error.localizedDescription)"
+        case .pixelBufferCreationFailed:
+            return "Aanmaken van pixel buffer mislukt"
         }
     }
 }
