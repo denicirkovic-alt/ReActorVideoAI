@@ -1,0 +1,153 @@
+name: Build iOS App
+
+on:
+  # Manueel triggeren via GitHub UI
+  workflow_dispatch:
+  # Of automatisch bij push naar main
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-ios:
+    name: Build iOS App (macOS Runner)
+    runs-on: macos-latest
+    
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # 3. Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          pip install torch coremltools
+      
+      # 4. Generate CoreML model (if not exists)
+      - name: Generate SimpleUpscaler Model
+        run: |
+          cd ReActorVideoAI
+          if [ ! -f "SimpleUpscaler_x4.mlmodel" ]; then
+            echo "Generating SimpleUpscaler model..."
+            python ../convert_simple.py --scale 4
+            mv SimpleUpscaler_x4.mlmodel ReActorVideoAI/
+          fi
+      
+      # 5. Setup Xcode
+      - name: Select Xcode Version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.0'
+      
+      # 6. Generate Xcode Project (if using XcodeGen)
+      - name: Generate Xcode Project
+        run: |
+          if command -v xcodegen &> /dev/null; then
+            echo "Generating Xcode project with XcodeGen..."
+            xcodegen generate
+          else
+            echo "Using existing .xcodeproj"
+          fi
+      
+      # 7. Import CoreML Model into Xcode
+      - name: Import CoreML Model
+        run: |
+          echo "CoreML model will be imported during build process"
+          ls -la ReActorVideoAI/*.mlmodel 2>/dev/null || echo "No .mlmodel files found"
+          ls -la ReActorVideoAI/*.mlpackage 2>/dev/null || echo "No .mlpackage files found"
+      
+      # 8. Build iOS App (Simulator)
+      - name: Build iOS App (iPhone 16 Pro Simulator)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ReActorVideoAI.xcodeproj \
+            -scheme ReActorVideoAI \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -configuration Debug \
+            clean build \
+            | xcpretty --color
+        continue-on-error: true  # Voor debugging, later op false zetten
+      
+      # 9. Build iOS App (Device - voor on-device testing)
+      - name: Build iOS App (Generic Device)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ReActorVideoAI.xcodeproj \
+            -scheme ReActorVideoAI \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            clean build \
+            | xcpretty --color
+        continue-on-error: true
+      
+      # 10. Package Artifacts
+      - name: Package Build Artifacts
+        run: |
+          mkdir -p build-artifacts
+          find ~/Library/Developer/Xcode/DerivedData -name "ReActorVideoAI.app" -type d -exec cp -R {} build-artifacts/ \; 2>/dev/null || echo "No .app found"
+          cp ReActorVideoAI/*.mlmodel build-artifacts/ 2>/dev/null || echo "No mlmodel to copy"
+          ls -la build-artifacts/
+      
+      # 11. Upload Artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-artifacts
+          path: |
+            build-artifacts/
+            ReActorVideoAI/*.mlmodel
+      
+      # 12. Create Release (alleen bij tags)
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build-artifacts/*
+            ReActorVideoAI/*.mlmodel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  convert-model:
+    name: Convert Model to CoreML
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install torch coremltools
+      
+      - name: Convert Simple Model
+        run: |
+          python convert_simple.py --scale 4
+          ls -la *.mlmodel
+      
+      - name: Convert to mlpackage (macOS native)
+        run: |
+          # Gebruik coremlc om .mlmodel te converteren naar .mlpackage
+          # Dit is optioneel, Xcode doet dit automatisch
+          xcrun coremlc compile SimpleUpscaler_x4.mlmodel SimpleUpscaler_x4.mlpackage 2>/dev/null || echo "Using mlmodel directly"
+      
+      - name: Upload Model Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coreml-model
+          path: |
+            SimpleUpscaler_x4.mlmodel
+            SimpleUpscaler_x4.mlpackage

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App Identificatie -->
+    <key>CFBundleDisplayName</key>
+    <string>ReActor Video-AI</string>
+    
+    <!-- Photo Library Toegang -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>ReActor Video-AI heeft toegang nodig tot je fotobibliotheek om video's te selecteren voor AI enhancement.</string>
+    
+    <!-- Photo Library Add -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>ReActor Video-AI wil de verbeterde video opslaan in je fotobibliotheek.</string>
+    
+    <!-- Bestanden App Toegang -->
+    <key>UISupportsDocumentBrowser</key>
+    <true/>
+    
+    <!-- Background Processing (voor lange video processing) -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>processing</string>
+    </array>
+    
+    <!-- App Transport Security (voor model downloads indien nodig) -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+</dict>
+</plist>
