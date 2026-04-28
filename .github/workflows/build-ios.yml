@@ -42,18 +42,11 @@ jobs:
 
       
       # 5. Setup Xcode
-      - name: Setup Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
-      
-      # 6. Generate Xcode Project (if using XcodeGen)
-      - name: Generate Xcode Project
+      - name: Install XcodeGen and Generate Project
         run: |
-          if command -v xcodegen &> /dev/null; then
-            echo "Generating Xcode project with XcodeGen..."
-            xcodegen generate
-          else
-            echo "Using existing .xcodeproj"
-          fi
+          brew install xcodegen
+          python create_xcode_project.py
+          ls -la
       
       # 7. Import CoreML Model into Xcode
       - name: Import CoreML Model
