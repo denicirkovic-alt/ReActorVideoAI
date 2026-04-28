@@ -263,6 +263,7 @@ enum ModelError: LocalizedError {
     case modelLoadingFailed(Error)
     case invalidInputSize
     case predictionFailed(Error)
+    case pixelBufferCreationFailed
     
     var errorDescription: String? {
         switch self {
