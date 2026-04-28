@@ -30,15 +30,16 @@ jobs:
         run: |
           pip install torch coremltools
       
-      # 4. Generate CoreML model (if not exists)
+            # 4. Generate CoreML model (if not exists)
       - name: Generate SimpleUpscaler Model
         run: |
-          cd ReActorVideoAI
-          if [ ! -f "SimpleUpscaler_x4.mlmodel" ]; then
+          if [ ! -f "ReActorVideoAI/SimpleUpscaler_x4.mlmodel" ]; then
             echo "Generating SimpleUpscaler model..."
-            python ../convert_simple.py --scale 4
+            python convert_simple.py --scale 4
+            mkdir -p ReActorVideoAI
             mv SimpleUpscaler_x4.mlmodel ReActorVideoAI/
           fi
+
       
       # 5. Setup Xcode
       - name: Select Xcode Version
