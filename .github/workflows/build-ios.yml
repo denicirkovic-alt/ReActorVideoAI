@@ -62,8 +62,9 @@ jobs:
           xcodebuild \
             -project ReActorVideoAI.xcodeproj \
             -scheme ReActorVideoAI \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
             clean build \
             | xcpretty --color
         continue-on-error: true
