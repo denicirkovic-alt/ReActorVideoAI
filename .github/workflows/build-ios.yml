@@ -56,17 +56,17 @@ jobs:
           ls -la ReActorVideoAI/*.mlpackage 2>/dev/null || echo "No .mlpackage files found"
       
       # 8. Build iOS App (Simulator)
-      - name: Build iOS App (iPhone 16 Pro Simulator)
+      - name: Build iOS App (iPhone Simulator)
         run: |
           set -o pipefail
           xcodebuild \
             -project ReActorVideoAI.xcodeproj \
             -scheme ReActorVideoAI \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
             -configuration Debug \
             clean build \
             | xcpretty --color
-        continue-on-error: true  # Voor debugging, later op false zetten
+        continue-on-error: true
       
       # 9. Build iOS App (Device - voor on-device testing)
       - name: Build iOS App (Generic Device)
