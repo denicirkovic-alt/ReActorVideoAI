@@ -145,7 +145,7 @@ actor VideoEnhancerService {
             AVVideoHeightKey: targetResolution.height,
             AVVideoCompressionPropertiesKey: [
                 AVVideoAverageBitRateKey: 10_000_000, // 10 Mbps
-                AVVideoProfileLevelKey: AVVideoProfileLevelHEVCMainAutoLevel
+                AVVideoProfileLevelKey: "HEVC_Main_AutoLevel
             ]
         ]
         
