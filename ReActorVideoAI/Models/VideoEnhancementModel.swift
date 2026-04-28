@@ -9,6 +9,8 @@
 import Foundation
 import CoreML
 import CoreVideo
+import CoreImage
+import Foundation
 
 /// Wrapper voor CoreML video enhancement model.
 /// Deze class beheert het CoreML model en biedt een interface voor frame processing.
